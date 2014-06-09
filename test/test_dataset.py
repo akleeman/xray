@@ -1,11 +1,13 @@
 from collections import OrderedDict
 from copy import copy, deepcopy
 from textwrap import dedent
+from xray.dataset import open_dataset
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
+import os
 import numpy as np
 import pandas as pd
 
@@ -322,6 +324,16 @@ class TestDataset(TestCase):
         self.assertVariableEqual(v[:3, 3:], v[d1 < 3, d2 >= 1.5])
         self.assertVariableEqual(v[:3, :2], v[range(3), range(2)])
         self.assertVariableEqual(v[:3, :2], v.loc[d1[:3], d2[:2]])
+
+    def test_from_disk(self):
+        data = create_test_data()
+        fname = os.path.join(os.path.dirname(__file__), 'from_test.nc')
+        data.to_netcdf(fname)
+        ds = open_dataset(fname)
+        ss = ds.indexed(time=slice(0, 2))
+        assert ss['time'].size == 2
+        print ss['time'].values.size, ss['time'].size, ss['time'].size == 2
+        raise ValueError()
 
     def test_select(self):
         data = create_test_data()
